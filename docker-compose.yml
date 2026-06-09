@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  bd_mysql:
+    image: mysql:8.0
+    container_name: contenedor_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_poli
+      MYSQL_DATABASE: mi_base_datos
+    ports:
+      - "3306:3306"
+    networks:
+      - red-plataforma
+
+  app_node:
+    image: node:18-alpine
+    container_name: contenedor_node
+    command: sh -c "npm init -y && npm install express && node"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - bd_mysql
+    networks:
+      - red-plataforma
+
+  servidor_nginx:
+    image: nginx:alpine
+    container_name: contenedor_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - app_node
+    networks:
+      - red-plataforma
+
+networks:
+  red-plataforma:
+    driver: bridge
+
