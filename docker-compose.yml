@@ -1,39 +1,53 @@
 version: '3.8'
 
 services:
-  bd_mysql:
+  ubuntu1:
+    image: ubuntu:latest
+    container_name: ubuntu1
+    command: tail -f /dev/null
+    networks:
+      - app-network
+
+  ubuntu2:
+    image: ubuntu:latest
+    container_name: ubuntu2
+    command: tail -f /dev/null
+    networks:
+      - app-network
+
+  mysql-db:
     image: mysql:8.0
-    container_name: contenedor_mysql
+    container_name: mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: root_password_poli
       MYSQL_DATABASE: mi_base_datos
     ports:
       - "3306:3306"
     networks:
-      - red-plataforma
+      - app-network
 
-  app_node:
+  nodeapp:
     image: node:18-alpine
-    container_name: contenedor_node
+    container_name: nodeapp
     command: sh -c "npm init -y && npm install express && node"
     ports:
       - "3000:3000"
     depends_on:
-      - bd_mysql
+      - mysql-db
     networks:
-      - red-plataforma
+      - app-network
 
-  servidor_nginx:
+  webserver:
     image: nginx:alpine
-    container_name: contenedor_nginx
+    container_name: webserver
     ports:
       - "80:80"
     depends_on:
-      - app_node
+      - nodeapp
     networks:
-      - red-plataforma
+      - app-network
 
 networks:
-  red-plataforma:
+  app-network:
+    name: app-network
     driver: bridge
-
